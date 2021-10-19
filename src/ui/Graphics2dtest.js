@@ -63,8 +63,6 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
     
     componentDidMount(){
         this.m_isMounted = true;
-        // this.prepareImageForRender();
-        // this.renderReadyImage();
 
         // detect actual render window dims
         const w = this.m_mount.clientWidth;
@@ -73,7 +71,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             this.setState({ wRender: w });
             this.setState({ hRender: h });
         }
-        this.prepareImageForRender(0);
+        this.prepareImageForRender();
     }
 
     componentWillUnmount() {
@@ -81,8 +79,6 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
       }
     
     componentDidUpdate() {
-        // this.prepareImageForRender();
-        // console.log('>>>>>>>>thisMount',this.m_isMounted)
         if (this.m_isMounted) {
             const store = this.props;
             const index = store.volumeIndex;
@@ -157,7 +153,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         ctx.fillRect(0, 0, w, h);
 
         const volIndex = (volIndexArg !== undefined) ? volIndexArg : 0;
-        // console.log('>>>>>volIndex',volIndex)
+
         // destination buffer to write
         const imgData = ctx.createImageData(w, h);
         const dataDst = imgData.data;
@@ -202,7 +198,11 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
 
 
         const slice = slices[volIndex];
+        if(slice === undefined){
+            return;
+        }
         const sliceData16 = slice.m_image;
+        // console.log('>>>>>>>slice.image',sliceData16)
         const xDim = slice.m_xDim;
         const yDim = slice.m_yDim;
         let maxVal = -LARGE_NUMBER;

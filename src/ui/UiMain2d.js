@@ -67,8 +67,8 @@ class UiMain2d extends React.Component {
                     </Col>
                     <Col xs md lg='20' style={strMinHeight} >
                         {/* <Graphics2d /> */}
-                        {/* <Graphics2dtest /> */}
-                        {jsxGraph2d}
+                        <Graphics2dtest />
+                        {/* {jsxGraph2d} */}
                     </Col>
                 </Row>
              </Layout>

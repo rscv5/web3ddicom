@@ -61,48 +61,49 @@ class Graphics2d extends React.Component{
     }
 
     drawSlice(ctx, wScreen, hScreen, imgData, dataDst, series, loaderDicom) {
-        // console.log(">>ctx",ctx)
-        // console.log('>>imgData',imgData);
-        // console.log('>>dataDst', dataDst);
-        // console.log('>>>series', series);
-        // console.log('>>>loaderDicom', loaderDicom)
+
         const serie = series[0];
         const slices = serie.m_slices;
         const numSlices = slices.length;
         // console.log('>>>>>>>>>>>>>>>>>>',numSlices);
     
-        // sort slices via slice location OR slice number
-        let minSliceNum = slices[0].m_sliceNumber;
-        let maxSliceNum = slices[0].m_sliceNumber;
-        for (let s = 0; s < numSlices; s++) {
-          const num = slices[s].m_sliceNumber;
-          minSliceNum = (num < minSliceNum) ? num : minSliceNum;
-          maxSliceNum = (num > maxSliceNum) ? num : maxSliceNum;
-        }
-        const difSlceNum = maxSliceNum - minSliceNum;
-        if (difSlceNum > 0) {
-          // sort slices by slice number (read from dicom tag)
-          slices.sort((a, b) => {
-            const zDif = a.m_sliceNumber - b.m_sliceNumber;
-            return zDif;
-          });
-        } else {
-          // sort slices by slice location (read from diocom tag)
-          slices.sort((a, b) => {
-            const zDif = a.m_sliceLocation - b.m_sliceLocation;
-            return zDif;
-          });
-        }
+        // // sort slices via slice location OR slice number
+        // let minSliceNum = slices[0].m_sliceNumber;
+        // let maxSliceNum = slices[0].m_sliceNumber;
+        // for (let s = 0; s < numSlices; s++) {
+        //   const num = slices[s].m_sliceNumber;
+        //   minSliceNum = (num < minSliceNum) ? num : minSliceNum;
+        //   maxSliceNum = (num > maxSliceNum) ? num : maxSliceNum;
+        // }
+        // const difSlceNum = maxSliceNum - minSliceNum;
+        // if (difSlceNum > 0) {
+        //   // sort slices by slice number (read from dicom tag)
+        //   slices.sort((a, b) => {
+        //     const zDif = a.m_sliceNumber - b.m_sliceNumber;
+        //     return zDif;
+        //   });
+        // } else {
+        //   // sort slices by slice location (read from diocom tag)
+        //   slices.sort((a, b) => {
+        //     const zDif = a.m_sliceLocation - b.m_sliceLocation;
+        //     return zDif;
+        //   });
+        // }
         // assign new slice numbers according accending location
         let ind = 0;
-        for (let s = 0; s < numSlices; s++) {
-          slices[s].m_sliceNumber = ind;
-          ind++;
-        }
-        loaderDicom.m_zDim = numSlices;
+        // for (let s = 0; s < numSlices; s++) {
+        //   slices[s].m_sliceNumber = ind;
+        //   ind++;
+        // }
+        // loaderDicom.m_zDim = numSlices;
     
-        const indexCenter = Math.floor(numSlices / 2);
-        const slice = slices[indexCenter];
+        // const indexCenter = Math.floor(ind);
+     
+        const slice = slices[ind];
+        // console.log('>>>>>>>>',slice.m_image)
+        if(slice.m_image === undefined){
+            return;
+        }
         const sliceData16 = slice.m_image;
         const xDim = slice.m_xDim;
         const yDim = slice.m_yDim;
@@ -126,9 +127,7 @@ class Graphics2d extends React.Component{
           minVal = (valData < minVal) ? valData : minVal;
           maxVal = (valData > maxVal) ? valData : maxVal;
         } // for (i) all slice pixels
-        // console.log(`Modal dcm. min/max val = ${minVal} / ${maxVal}`);
-        // this.m_dataMin = minVal;
-        // this.m_dataMax = maxVal;
+
         const wMin = this.state.windowMin;
         const wMax = this.state.windowMax;
         const wc = Math.floor((wMax + wMin) * 0.5);
@@ -323,8 +322,8 @@ class Graphics2d extends React.Component{
     /**
      * Invoke forced rendering, after some tool visual changes
      */
-    forceUpdate(volIndex){
-        this.prepareImageForRender(volIndex);
+    forceUpdate(){
+        this.prepareImageForRender();
         this.forceRender();
     }
 
