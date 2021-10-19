@@ -159,6 +159,9 @@ class LoaderDcmDaikon {
         this.m_loaderDicom.m_pixelSpacing.z = 0.0;
         this.m_loaderDicom.m_xDim = xDim;
         this.m_loaderDicom.m_yDim = yDim;
+
+        
+        
         // console.log('.>>>>>>>>>>>>>>>>>>>',this.m_loaderDicom)
 
         if (fileIndex < this.m_loaderDicom.m_slicesVolume.m_minSlice) {
@@ -388,6 +391,17 @@ class LoaderDcmDaikon {
         // console.log('val pad = ' + valPad);
         }
 
+        // get important tag: pixel spacing in 2d (xy)
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[1]);
+        // if ((tag.m_group === TAG_PIXEL_SPACING[0]) && (tag.m_element === TAG_PIXEL_SPACING[1])) {
+        const tagPixelSpa = image.tags[ind];
+        if(tagPixelSpa !== undefined){
+            let dataLen = tagPixelSpa.value;
+            this.m_loaderDicom.m_pixelSpacing.x = parseFloat(dataLen[0]);
+            // console.log('>>>>>>>>>>this>>>>>',this.m_loaderDicom.m_pixelSpacing)
+            this.m_loaderDicom.m_pixelSpacing.y = parseFloat(dataLen[1]);
+        }
+
         // add volume slice to slices volume (and manage series)
         this.m_loaderDicom.m_slicesVolume.addSlice(volSlice);
 
@@ -433,6 +447,8 @@ class LoaderDcmDaikon {
         // store x, y dims
         volSlice.m_xDim = xDim;
         volSlice.m_yDim = yDim;
+        this.m_loaderDicom.m_boxSize.x = xDim * this.m_loaderDicom.m_pixelSpacing.x;
+        this.m_loaderDicom.m_boxSize.y = yDim * this.m_loaderDicom.m_pixelSpacing.y;
         
         return LoadResult.SUCCESS;
     }

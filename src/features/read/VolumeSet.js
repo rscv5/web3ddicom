@@ -10,7 +10,7 @@
 import React from 'react';
 
 import Volume from './Volume';
-// import LoaderDicom from '../../loader/LoaderDicom';
+import LoaderDicom from '../../loader/LoaderDicom';
 
 
 
@@ -124,14 +124,14 @@ class VolumeSet extends React.Component {
     readFromDicom(loader, arrBuf, callbackProgress, callbackComplete) {
         const indexFile = 0;
         const fileName = 'file???';
-        const ratio = 0.0;
+        // const ratio = 0.0;
         // LoaderDicom func
-        const ret = loader.readFromBuffer(indexFile, fileName, ratio, arrBuf, callbackProgress, callbackComplete);
+        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackProgress, callbackComplete);
         return ret;
     }
 
-    readSingleSliceFromDicom(loader, indexFile, fileName, ratioLoaded, arrBuf, callbackProgress, callbackComplete) {
-        const ret = loader.readFromBuffer(indexFile, fileName, ratioLoaded, arrBuf, callbackProgress, callbackComplete);
+    readSingleSliceFromDicom(loader, indexFile, fileName, arrBuf, callbackProgress, callbackComplete) {
+        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackProgress, callbackComplete);
         return ret;
     }
 

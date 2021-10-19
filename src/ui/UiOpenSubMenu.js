@@ -225,7 +225,7 @@ class UiOpenSubMenu extends React.Component {
             const fileName = this.m_fileName;
             const fileIndex = this.m_fileIndex;
             this.m_loader = new LoaderDicom(1);
-            console.log('>>>>>>>>m_loader>>>>',this.m_loader)
+            // console.log('>>>>>>>>m_loader>>>>',this.m_loader)
             // console.log('>>>>>>>m_volumeSet>>', this.m_volumeSet)
             const ret = loaderDcm.readSingleSlice(store, this.m_loader, fileIndex, fileName, strContent);
             this.callbackReadSingleDicomComplete(ret);
@@ -260,14 +260,25 @@ class UiOpenSubMenu extends React.Component {
         var m_fileIndex = this.m_fileIndex;
         const store = this.props;
 
+        // if (m_fileIndex <= 1) {
+        //     // add new volume to volume set on the first slice
+        //     const vol = new Volume();
+        //     this.m_volumeSet.addVolume(vol);
+        //     // init progress on the first file loading
+        //     // this.callbackReadProgress(0.0);
+        // }
+
         let readStatus;
         fileReader.onloadend = function(e){
             var rawlog = fileReader.result;
             const loaderDcm = new LoaderDcmDaikon();
             var index = m_fileIndex - 1; 
-            // console.log(">>>>>index", index)
-            readStatus = loaderDcm.readSlice(m_loader, index, file.name, rawlog);
-            // store.dispatch({ type: StoreActionType.SET_VOLUME_INDEX, volumeIndex: this.m_fileIndex - 1 });
+            if(READ_DICOM_VIA_DAIKON){
+                readStatus = loaderDcm.readSlice(m_loader, index, file.name, rawlog);
+            }else{
+                volumeSet.addVolume(new Volume());
+                m_loader.readFromBuffer(index, file.name, rawlog);
+            }
             volumeSet.addVolume(new Volume());
             store.dispatch({ type: StoreActionType.SET_VOLUME_INDEX, volumeIndex: index });
             if (readStatus !== LoadResult.SUCCESS) {

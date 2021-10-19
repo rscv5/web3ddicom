@@ -42,7 +42,7 @@ class UiApp extends React.Component {
         // console.log('>>>>>>>>>misload>>>>>>', isLoaded)
 
         const jsxReact =
-            <Layout theme='light'>
+            <Layout theme='light' style={{minHeight:'100vh'}}>
                 <Header style={{ paddingLeft: '0px', paddingRight: '0px', background: 'white' }}>
                     <Row>
                         <Col key='file-name'>
@@ -54,7 +54,7 @@ class UiApp extends React.Component {
                         </Col>
                     </Row>
                 </Header>
-                <Content style={{ padding: '0 10px' }}>
+                <Content style={{ padding: '0 10px'}} >
                     {(isLoaded) ? <UiMain /> : 
                         <p>No Content</p>
                         // console.log('>>>>hhh>>>', volumeSlices)

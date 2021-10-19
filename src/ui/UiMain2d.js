@@ -16,6 +16,8 @@ import Graphics2d from '../features/Graphics2d';
 import Graphics2dtest from './Graphics2dtest';
 import UiCtrl2d from './UiCtrl2d';
 
+import '../css/ui2d.css'
+
 //*************************************************
 // Const
 //*************************************************
@@ -49,23 +51,27 @@ class UiMain2d extends React.Component {
         const volSet = store.volumeSet;
         const vols = volSet.m_volumes;
         const numVols = vols.length;
-        const jsxVolSel = (numVols > 1)? <UiVolumeSel/> : <UiInfo2d/>
+        const jsxVolSel = (numVols > 1)? <UiCtrl2d/> : <UiInfo2d/>
         // const jsxVolSel =  (numVols > 1)? <UiVolumeSel/> : <br/>;
+        const jsxGraph2d = (numVols > 1) ? <Graphics2dtest/> :<Graphics2d/>
 
 
         const jsxMain2d =
-            <Layout fluid="true" style={{ height: '100%', minHeight: '100%' }}>
-                <Row>
-                    <Col xs md lg="4" style={{ height: '100%', position: 'relative' }}>
+            <Layout fluid="true" className='ui-main2d-info'>
+                <Row className='ui-main2d-info' key='UiMain2dRow'>
+                    <Col xs md lg="4" >
+                        {/* <Layout> */}
                         {/* <UiCtrl2d/> */}
                         {jsxVolSel}
+                        {/* </Layout> */}
                     </Col>
                     <Col xs md lg='20' style={strMinHeight} >
-                        <Graphics2d />
+                        {/* <Graphics2d /> */}
                         {/* <Graphics2dtest /> */}
+                        {jsxGraph2d}
                     </Col>
                 </Row>
-            </Layout>
+             </Layout>
         return jsxMain2d;
     };
 }

@@ -8,7 +8,7 @@
 
 import DicomDictionary from '../dicomvol/dicomdict';
 import DicomInfo from '../dicomvol/dicominfo';
-// import DicomTag from './dicomtag';
+import DicomTag from '../dicomvol/dicomtag';
 import DicomSlice from '../dicomvol/dicomslice';
 import DicomSlicesVolume from '../dicomvol/dicomslicesvolume';
 import Volume from '../features/read/Volume';
@@ -1268,7 +1268,10 @@ class LoaderDicom {
      * @param {object} arrBuf - source byte buffer, ArrayBuffer type
      * @return LoadResult.XXX
      */
-    readFromBuffer(indexFile, fileName, ratioLoaded, arrBuf, callbackProgress, callbackComplete) {
+    readFromBuffer(indexFile, fileName, arrBuf, callbackProgress, callbackComplete) {
+
+        // console.log('>>>>>>>>>>>')
+
         if (typeof indexFile !== 'number') {
         console.log('LoaderDicom.readFromBuffer: bad indexFile argument');
         }

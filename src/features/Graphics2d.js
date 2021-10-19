@@ -120,6 +120,7 @@ class Graphics2d extends React.Component{
           }
           // check pad value
           valSrc = (valSrc === loaderDicom.m_padValue) ? 0 : valSrc;
+          // console.log('valSrc', loaderDicom.m_littleEndian, loaderDicom.m_padValue, valSrc)
           
           const valData = valSrc * loaderDicom.m_rescaleSlope + loaderDicom.m_rescaleIntercept;
           minVal = (valData < minVal) ? valData : minVal;
@@ -128,21 +129,10 @@ class Graphics2d extends React.Component{
         // console.log(`Modal dcm. min/max val = ${minVal} / ${maxVal}`);
         // this.m_dataMin = minVal;
         // this.m_dataMax = maxVal;
-    
         const wMin = this.state.windowMin;
         const wMax = this.state.windowMax;
         const wc = Math.floor((wMax + wMin) * 0.5);
         const ww = wMax - wMin;
-    
-        const BITS_ACCUR = 11;
-        const BITS_IN_BYTE = 8;
-        const scale = Math.floor((1 << (BITS_IN_BYTE + BITS_ACCUR)) / (maxVal - minVal));
-        const TOO_MIN_SCALE = 4;
-        if (scale <= TOO_MIN_SCALE) {
-          console.log('Bad scaling: image will be 0');
-          return;
-        }
-        // const MAX_BYTE = 255;
     
         // create temp data array: 8 bit image for this slice
         const dataArray = new Uint8Array(xyDim);
@@ -197,7 +187,6 @@ class Graphics2d extends React.Component{
     componentDidUpdate(){
         this.prepareImageForRender();
         // this.renderReadyImage();
-        
     }
 
     // componentWillUnmount(){
@@ -212,14 +201,11 @@ class Graphics2d extends React.Component{
         this.renderReadyImage();
 
         // detect actual render window dims
-        // console.log('>>>>>>>>>>>>>>>',this.m_mount)
         const w = this.m_mount.clientWidth;
         const h = this.m_mount.clientHeight;
         // const w = 500;
         // const h = 500;
 
-        // console.log('>>>>>>>>>>>>>>>>>',this.m_mount)
-        // console.log('>>>>>>>>>>>>>>>>>>>>w,h',w,h)
         if(this.state.wRender === 0){
             this.setState({ wRender: w });
             this.setState({ hRender: h });
@@ -250,10 +236,10 @@ class Graphics2d extends React.Component{
 
         const xSize = Math.floor(loaderDicom.m_boxSize.x);
         const ySize = Math.floor(loaderDicom.m_boxSize.y);
-        const zSize = Math.floor(loaderDicom.m_boxSize.z);
+        // const zSize = Math.floor(loaderDicom.m_boxSize.z);
         strMsg = 'vol size =' + xSize.toString() + ' * ' +
             ySize.toString() + ' * ' +
-            zSize.toString();
+            // zSize.toString();
         ctx.fillText(strMsg, xText, yText);
         yText += FONT_SZ;
 
@@ -318,7 +304,6 @@ class Graphics2d extends React.Component{
     } // prepareImageForRender
 
     renderReadyImage(){
-        // console.log('>>>>>>>>>>>>>>>why')
         if(!this.m_isMounted){
             return;
         }
@@ -331,18 +316,8 @@ class Graphics2d extends React.Component{
         const store = this.props;
 
         const loaderDicom = store.loaderDicom;
-        // if(volSet.getNumVolumes() === 0){
-        //     return;
-        // }
-        const volIndex = store.volumeIndex;
-        // const series = loaderDicom.m_slices
-        // if(vol === null){
-        //     return;
-        // }
-        // render text info
         
         this.renderTextInfo(ctx,loaderDicom)
-        // this.renderTextInfo(ctx, volSet, vol);
     }
 
     /**

@@ -36,7 +36,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         this.m_dataMin = LARGE_NUMBER;
         this.m_dataMax = LARGE_NUMBER;
 
-        this.m_mode2d = Modes2d.FRONTVIEW;
+        // this.m_mode2d = Modes2d.FRONTVIEW;
         this.m_sliceRation = 0.5;
 
         // mounted
@@ -60,10 +60,11 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
 
     }
 
+    
     componentDidMount(){
         this.m_isMounted = true;
-        this.prepareImageForRender();
-        this.renderReadyImage();
+        // this.prepareImageForRender();
+        // this.renderReadyImage();
 
         // detect actual render window dims
         const w = this.m_mount.clientWidth;
@@ -72,15 +73,37 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             this.setState({ wRender: w });
             this.setState({ hRender: h });
         }
+        this.prepareImageForRender(0);
     }
 
-    componentWillUnmount(){
+    componentWillUnmount() {
         this.m_isMounted = false;
+      }
+    
+    componentDidUpdate() {
+        // this.prepareImageForRender();
+        // console.log('>>>>>>>>thisMount',this.m_isMounted)
+        if (this.m_isMounted) {
+            const store = this.props;
+            const index = store.volumeIndex;
+            this.prepareImageForRender(index);
+            this.renderReadyImage();
+        }
     }
 
-    componentDidUpdate(){
+
+
+    // update graph2dimg
+    forceUpdate(){
+        const store = this.props;
+        const index = store.volumeIndex;
+        this.prepareImageForRender(index);
+        this.forceRender();
+    }
+
+    forceRender(){
         if(this.m_isMounted){
-            this.renderReadyImage();
+            this.setState({state: this.state});
         }
     }
 
@@ -90,7 +113,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
      * @param {object} ctx - render context
      * @param {VolumeSet} volSet - volume set to rener
      */
-    renderTextInfo(ctx, volSet, vol){
+    renderTextInfo(ctx, loaderDicom, volIndex){
         let strMsg;
         let xText = 4;
         let yText = 4;
@@ -100,27 +123,20 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         ctx.textBaseline = 'top';
         ctx.fillStyle = 'grey';
 
-        strMsg = 'volume dim = ' + vol.m_xDim.toString() + ' * ' + 
-        vol.m_yDim.toString() + ' * ' + 
-        vol.m_zDim.toString();
+        strMsg = 'volume dim = ' + loaderDicom.m_xDim.toString() + ' * ' + 
+        loaderDicom.m_yDim.toString() + ' * ' + 
+        loaderDicom.m_zDim.toString();
         ctx.fillText(strMsg, xText, yText);
         yText += FONT_SZ;
 
-        const xSize = Math.floor(vol.m_boxSize.x);
-        const ySize = Math.floor(vol.m_boxSize.y);
-        const zSize = Math.floor(vol.m_boxSize.z);
+        const xSize = Math.floor(loaderDicom.m_boxSize.x);
+        const ySize = Math.floor(loaderDicom.m_boxSize.y);
         strMsg = 'vol phys size = ' + xSize.toString() + ' * ' + 
-        ySize.toString() + ' * ' + 
-        zSize.toString();
+        ySize.toString()
         ctx.fillText(strMsg, xText, yText);
         yText += FONT_SZ;
 
-        const patName = volSet.m_patientName;
-        if (patName.length > 1) {
-          strMsg = 'patient name = ' + patName; 
-          ctx.fillText(strMsg, xText, yText);
-          yText += FONT_SZ;
-        }
+
     }
 
     prepareImageForRender(volIndexArg){
@@ -140,127 +156,130 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         ctx.fillStyle = 'rgb(64, 64, 64)';
         ctx.fillRect(0, 0, w, h);
 
-        const volSet = store.volumeSet;
-        const volIndex = (volIndexArg !== undefined) ? volIndexArg : store.volumeIndex;
+        const volIndex = (volIndexArg !== undefined) ? volIndexArg : 0;
+        // console.log('>>>>>volIndex',volIndex)
+        // destination buffer to write
+        const imgData = ctx.createImageData(w, h);
+        const dataDst = imgData.data;
+        let j = 0;
+        // test draw chessboard
+        const NEED_TEST_RAINBOW = false;
+        if(NEED_TEST_RAINBOW){
+            console.log('special rainbow test instead slice render')
+            for(let y = 0; y < h; y++){
+                for(let x = 0; x < w; x++){
+                    let b = Math.floor(255 * x / w);
+                    let g = Math.floor(255 * y / h);
+                    let r = 50;
+                    dataDst[j + 0] = r;
+                    dataDst[j + 1] = g;
+                    dataDst[j + 2] = b;
+                    dataDst[j + 3] = 255;
+                    j += 4;
+                } // for x
+            } // for y
+            ctx.putImageData(imgData, 0, 0);
+            return;
+        }
 
-        const vol = volSet.getVolume(volIndex);
-        // const mode2d = this.m_mode2d;
-        // const sliceRatio = store.slider2d;
-
-        if(vol !== null){
-            if(vol.m_dataArray === null){
-                console.log('Graphics2d. Volume has no data array');
-                return;
-            }
-            const xDim = vol.m_xDim;
-            const yDim = vol.m_yDim;
-            const zDim = vol.m_zDim;
-            // const xyDim = xDim * yDim;
-            const dataSrc = vol.m_dataArray; // 1 or 4 bytes array of pixels
-            if(dataSrc.length !== xDim * yDim * zDim * vol.m_bytesPerVoxel){
-                console.log(`Bad src data len = ${dataSrc.length}, but expect ${xDim}*${yDim}*${zDim}`);
-            }
-            console.log('1111111111')
-
-        // const ONE = 1;
-        // const FOUR = 4;
-        // const OFF_3 = 3;
-
-        // let imgData = null;
-        // let dataDst = null;
-
-        // const roiPal256 = this.m_roiPalette.getPalette256();
-
-        // // determine actual render square (not w * h - viewport)
-        // // calculate area using physical volume dimension
-        // const TOO_SMALL = 1.0e-5;
-        // const pbox = vol.m_boxSize;
-        // if (pbox.x * pbox.y * pbox.z < TOO_SMALL) {
-        //     console.log(`Bad physical dimensions for rendered volume = ${pbox.x}*${pbox.y}*${pbox.z} `);
-        // }
-        // let wScreen = 0, hScreen = 0;
-
-        // const xPos = store.render2dxPos;
-        // const yPos = store.render2dyPos;
-        // const zoom = store.render2dZoom;
-        // // console.log(`Gra2d. RenderScene. zoom=${zoom}, xyPos=${xPos}, ${yPos}`);
-        // if (mode2d === Modes2d.TOPVIEW) {
-        //     // calc screen rect based on physics volume slice size (z slice)
-        //     const xyRratio = pbox.x / pbox.y;
-        //     wScreen = w;
-        //     hScreen = Math.floor(w / xyRratio);
-        //     if (hScreen > h) {
-        //     hScreen = h;
-        //     wScreen = Math.floor(h * xyRratio);
-        //     if (wScreen > w) {
-        //         console.log(`logic error! wScreen * hScreen = ${wScreen} * ${hScreen}`);
-        //     }
-        //     }
-        //     hScreen = (hScreen > 0) ? hScreen : 1;
-        //     // console.log(`gra2d. render: wScreen*hScreen = ${wScreen} * ${hScreen}, but w*h=${w}*${h} `);
-        
-        //         // create image data
-        //     imgData = ctx.createImageData(wScreen, hScreen);
-        //     dataDst = imgData.data;
-        //     if (dataDst.length !== wScreen * hScreen * 4) {
-        //     console.log(`Bad dst data len = ${dataDst.length}, but expect ${wScreen}*${hScreen}*4`);
-        //     }
-  
-        //     // z slice
-        //     let zSlice = Math.floor(zDim * sliceRatio);
-        //     zSlice = (zSlice < zDim) ? zSlice : (zDim - 1);
-        //     const zOff = zSlice * xyDim;
-        //     const xStep = zoom * xDim / wScreen;
-        //     const yStep = zoom * yDim / hScreen;
-        //     let j = 0;
-        //     let ay = yPos * yDim;
-        //     if (vol.m_bytesPerVoxel === ONE) {
-        //     for (let y = 0; y < hScreen; y++, ay += yStep) {
-        //         const ySrc = Math.floor(ay);
-        //         const yOff = ySrc * xDim;
-        //         let ax = xPos * xDim;
-        //         for (let x = 0; x < wScreen; x++, ax += xStep) {
-        //         const xSrc = Math.floor(ax);
-        //         const val = dataSrc[zOff + yOff + xSrc];
-        //         dataDst[j + 0] = val;
-        //         dataDst[j + 1] = val;
-        //         dataDst[j + 2] = val;
-        //         dataDst[j + 3] = 255; // opacity
-        //         j += 4;
-        //         } // for (x)
-        //     } // for (y)
-
-        //     } else if (vol.m_bytesPerVoxel === FOUR) {
-        //     for (let y = 0; y < hScreen; y++, ay += yStep) {
-        //         const ySrc = Math.floor(ay);
-        //         const yOff = ySrc * xDim;
-        //         let ax = xPos * xDim;
-        //         for (let x = 0; x < wScreen; x++, ax += xStep) {
-        //         const xSrc = Math.floor(ax);
-        //         const val = dataSrc[(zOff + yOff + xSrc) * FOUR + OFF_3];
-        //         const val4 = val * FOUR;
-        //         const rCol = roiPal256[val4 + 0];
-        //         const gCol = roiPal256[val4 + 1];
-        //         const bCol = roiPal256[val4 + 2];
-    
-        //         dataDst[j + 0] = bCol;
-        //         dataDst[j + 1] = gCol;
-        //         dataDst[j + 2] = rCol;
-        //         dataDst[j + 3] = 255;
-        //         j += 4;
-        //         } // for (x)
-        //     } // for (y)
-
-        // } // if 4 bpp
-        // }
-    }
-    console.log('>>>>>>>>>vol',vol)
-        
-
+        const loaderDicom = store.loaderDicom;
+        if(loaderDicom === null){
+            return;
+        }
+        const series = loaderDicom.m_slicesVolume.m_series;
+        if(series.length === 0){
+            return;
+        }
+        this.drawSlice(ctx, w, h, imgData, dataDst, series, loaderDicom, volIndex);
+        this.renderReadyImage(volIndex);
     }
 
-    renderReadyImage(){
-        // console.log('renderReadyImage ...');
+    drawSlice(ctx, wScreen, hScreen, imgData, dataDst, series, loaderDicom, volIndex){
+        const serie = series[0];
+        const slices = serie.m_slices;
+        const numSlices = slices.length; 
+        loaderDicom.m_zDim = numSlices;
+
+
+        const slice = slices[volIndex];
+        const sliceData16 = slice.m_image;
+        const xDim = slice.m_xDim;
+        const yDim = slice.m_yDim;
+        let maxVal = -LARGE_NUMBER;
+        let minVal = +LARGE_NUMBER;
+        const xyDim = xDim * yDim;
+        const zOff = 0;
+        let i;
+        for(i = 0; i < xyDim; i++){
+            let valSrc = sliceData16[i];
+            // check big endian
+            if(!loaderDicom.m_littleEndian){
+                const valBytesSwap = (valSrc >> 8) | ((valSrc << 8) & 0xffff);
+                valSrc = valBytesSwap;
+            }
+            // check pad value
+            valSrc = (valSrc === loaderDicom.m_padValue) ? 0 : valSrc;
+            const valData = valSrc * loaderDicom.m_rescaleSlope + loaderDicom.m_rescaleIntercept;
+            minVal = (valData < minVal) ? valData : minVal;
+            maxVal = (valData > maxVal) ? valData : maxVal;
+        } // for (i) all slice pixels
+
+        const wMin = this.state.windowMin;
+        const wMax = this.state.windowMax;
+        const wc = Math.floor((wMax + wMin) * 0.5);
+        const ww = wMax - wMin;
+
+        // create temp data array: 8 bit image for this slice
+        const dataArray = new Uint8Array(xyDim);
+        const winMin = wc - ww * 0.5;
+        for(i = 0; i < xyDim; i++){
+            let valSrc = sliceData16[i];
+            // check big endian 
+            if(!loaderDicom.m_littleEndian){
+                const valBytesSwap = (valSrc >> 8) | ((valSrc << 8) & 0xffff);
+                valSrc = valBytesSwap;
+            }
+            // check pad value
+            valSrc = (valSrc === loaderDicom.m_padValue) ? 0 :valSrc;
+            const valScaled = valSrc * loaderDicom.m_rescaleSlope + loaderDicom.m_rescaleIntercept
+            
+            let val = 0;
+            if(loaderDicom.m_rescaleHounsfield){
+                // rescale for hounsfield units
+                val = Math.floor((valScaled - winMin) * 255 / ww);
+            } else{
+                // usual (default) rescale
+                val = Math.floor(127 + (valScaled - wc) * 128 / (ww / 2));
+            }
+            val = (val >= 0) ? val : 0;
+            val = (val <= 255) ? val : 255;
+            dataArray[zOff + i] = val;
+        } // for i
+
+        // draw 8 but image into window
+        let j = 0;
+        const xStep = xDim / wScreen;
+        const yStep = yDim / hScreen;
+        let ay = 0.0;
+        for(let y = 0; y < hScreen; y++, ay += yStep){
+            const ySrc = Math.floor(ay);
+            const yOff = ySrc * xDim;
+            let ax = 0.0;
+            for(let x = 0; x < wScreen; x++, ax += xStep){
+                const xSrc = Math.floor(ax);
+                const val = dataArray[ zOff + yOff + xSrc];
+                dataDst[j + 0] = val;
+                dataDst[j + 1] = val;
+                dataDst[j + 2] = val;
+                dataDst[j + 3] = 255; // opacity
+                j += 4;
+            } // for x
+        } // for y
+        ctx.putImageData(imgData, 0, 0);
+    } // end draw slice
+
+    renderReadyImage(volIndex){
+
         if(!this.m_isMounted){
             return;
         }
@@ -271,18 +290,9 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         const ctx = objCanvas.getContext('2d');
         const store = this.props;
 
-        const volSet = store.volumeSet;
-        if(volSet.getNumVolumes() === 0){
-            return;
-        }
-        const volIndex = store.volumeIndex;
-        const vol = volSet.getVolume(volIndex);
-        if(vol === null){
-            return;
-        }
-        // ctx.putImageData(this.imgData, 0, 0);
+        const info = store.loaderDicom;
         // render text info
-        this.renderTextInfo(ctx, volSet, vol);
+        this.renderTextInfo(ctx, info, volIndex);
 
     }
 
