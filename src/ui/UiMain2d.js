@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { Row, Col, Layout } from 'antd';
+import { Row, Col, Layout, Card } from 'antd';
 import UiVolumeSel from './UiVolumeSel';
 import UiInfo2d from './UiInfo2d';
 import Graphics2d from '../features/Graphics2d';
@@ -51,8 +51,8 @@ class UiMain2d extends React.Component {
         const volSet = store.volumeSet;
         const vols = volSet.m_volumes;
         const numVols = vols.length;
-        const jsxVolSel = (numVols > 1)? <UiCtrl2d/> : <UiInfo2d/>
-        // const jsxVolSel =  (numVols > 1)? <UiVolumeSel/> : <br/>;
+        // const jsxVolSel = (numVols > 1)? <UiCtrl2d/> : <UiInfo2d/>
+        const jsxVolSel =  (numVols > 1)? <UiCtrl2d/> : <br/>;
         const jsxGraph2d = (numVols > 1) ? <Graphics2dtest/> :<Graphics2d/>
 
 
@@ -62,7 +62,10 @@ class UiMain2d extends React.Component {
                     <Col xs md lg="4" >
                         {/* <Layout> */}
                         {/* <UiCtrl2d/> */}
+                        <Card key='card_2dimg' title='Plane (Slice) View'>
                         {jsxVolSel}
+                        <UiInfo2d/>
+                        </Card>
                         {/* </Layout> */}
                     </Col>
                     <Col xs md lg='20' style={strMinHeight} >

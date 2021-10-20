@@ -186,6 +186,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         if(series.length === 0){
             return;
         }
+        console.log('>>>>>>>store.loaderDicom',loaderDicom)
         this.drawSlice(ctx, w, h, imgData, dataDst, series, loaderDicom, volIndex);
         this.renderReadyImage(volIndex);
     }

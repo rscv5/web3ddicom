@@ -105,10 +105,10 @@ class UiCtrl2d extends React.Component{
         </Row> : <p></p>;
 
         const jsxRenderControls =
-        <Card key='card_2dimg' title='Plane (Slice) View'>
+        <Row key='card_2dimg'>
            {/* {jsxSliceSelector} */}
            {jsxSlider}
-        </Card>
+        </Row>
         return jsxRenderControls;
     }
 }
