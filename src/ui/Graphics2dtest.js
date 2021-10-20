@@ -67,6 +67,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         // detect actual render window dims
         const w = this.m_mount.clientWidth;
         const h = this.m_mount.clientHeight;
+        // console.log('>>>>>>>>>h',this.m_mount)
         if(this.state.wRender === 0){
             this.setState({ wRender: w });
             this.setState({ hRender: h });
@@ -186,7 +187,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         if(series.length === 0){
             return;
         }
-        console.log('>>>>>>>store.loaderDicom',loaderDicom)
+        // console.log('>>>>>>>store.loaderDicom',loaderDicom)
         this.drawSlice(ctx, w, h, imgData, dataDst, series, loaderDicom, volIndex);
         this.renderReadyImage(volIndex);
     }
@@ -311,7 +312,11 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
 
         const jsxGrapNonSized = <canvas ref = {(mount) => {this.m_mount = mount}} style={styleObj}/>
         const jsxGrapSized = <canvas ref = { (mount) => {this.m_mount = mount}} 
-                                width = { this.state.wRender } height = { this.state.hRender }/>
+                                width = { this.state.wRender } 
+                                height = { this.state.hRender }
+                                // height="100%"
+                                // style={{height:'50%'}}
+                            />
         const jsx = (this.state.wRender > 0) ? jsxGrapSized : jsxGrapNonSized;
         return jsx;             
     }

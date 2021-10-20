@@ -89,9 +89,8 @@ class UiCtrl2d extends React.Component{
         const volSet = store.volumeSet;
         let slideRangeMax = volSet.getNumVolumes();
         const jsxSlider = (slideRangeMax > 1) ?
-        <Row>
-          <Divider orientation='left'>Select Dicom</Divider>
-          <Col span={12}>
+          <Row key='select_dicom_row' style={{paddingLeft:"30px", width:'90%'}}>
+          <Col span={20} >
             <Slider min={0} max={slideRangeMax-1} step={1} defaultValue={0} 
                     onChange={this.onChangeSliderSlice}
                     value = {inputValue}
@@ -101,11 +100,13 @@ class UiCtrl2d extends React.Component{
             <InputNumber min={0} max={slideRangeMax-1} step={1} defaultValue={0} 
                         value={inputValue} 
                         onChange={this.onChangeSliderSlice} style={{margin: '0 16px'}}/>  
-           </Col>  
-        </Row> : <p></p>;
+           </Col>
+           </Row> 
+        : <p></p>;
 
         const jsxRenderControls =
-        <Row key='card_2dimg'>
+        <Row key='select2d_row'>
+           <Divider orientation='left'>Select Dicom</Divider>
            {/* {jsxSliceSelector} */}
            {jsxSlider}
         </Row>

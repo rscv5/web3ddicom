@@ -101,9 +101,8 @@ class UiCtrl2d extends React.Component {
         ];
 
         
-        const jsxPatientInfo = 
-            <Row>
-            <Divider orientation='left'>Dicom Info</Divider>
+        const jsxPatientInfo =
+        <Row style={{ padding:'20px', paddingLeft:'10%'}} key='dicom2d_info_list'>
             <List
                 bordered
                 dataSource={patientInfo}
@@ -111,13 +110,17 @@ class UiCtrl2d extends React.Component {
                     <List.Item>
                         {item}
                     </List.Item>
-                )}/>
-            </Row>
+                )}
+                key='dicom_list'
+                style={{width:'100%'}}
+                />
+        </Row>
         
             
 
         const jsxRenderControls =
-            <Row key='card_2dimg'>
+            <Row key='dicom2d_info_row' style={{paddingTop:'10px'}}>
+                <Divider orientation='left'>Dicom Info</Divider>
                 {jsxPatientInfo}
             </Row>
         return jsxRenderControls;

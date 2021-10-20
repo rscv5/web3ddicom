@@ -40,11 +40,15 @@ class UiMain2d extends React.Component {
      */
     render() {
 
-        const MIN_HEIGHT = 500;
-        const MIN_WIDTH = 500;
+        const MIN_HEIGHT = 600;
+        const MIN_WIDTH = 600;
         const strMinHeight = {
             minHeight: MIN_HEIGHT.toString() + 'px',
-            minWidth: MIN_WIDTH.toString() + 'px'
+            minWidth: MIN_WIDTH.toString() + 'px',
+            marginTop:'10px',
+            // height:'100%',
+            marginLeft:'10px',
+            // border:'20px'
         };
 
         const store = this.props;
@@ -53,25 +57,21 @@ class UiMain2d extends React.Component {
         const numVols = vols.length;
         // const jsxVolSel = (numVols > 1)? <UiCtrl2d/> : <UiInfo2d/>
         const jsxVolSel =  (numVols > 1)? <UiCtrl2d/> : <br/>;
-        const jsxGraph2d = (numVols > 1) ? <Graphics2dtest/> :<Graphics2d/>
+        // const jsxGraph2d = (numVols > 1) ? <Graphics2dtest/> :<Graphics2d/>
 
 
         const jsxMain2d =
             <Layout fluid="true" className='ui-main2d-info'>
                 <Row className='ui-main2d-info' key='UiMain2dRow'>
-                    <Col xs md lg="4" >
-                        {/* <Layout> */}
-                        {/* <UiCtrl2d/> */}
-                        <Card key='card_2dimg' title='Plane (Slice) View'>
-                        {jsxVolSel}
-                        <UiInfo2d/>
+                    <Col xs md lg="4" key='col_2dimg'>
+                        <Card key='card_2dimg' title='Plane (Slice) View'
+                             style={{margin:'10px'}}>
+                                {jsxVolSel}
+                                <UiInfo2d/>
                         </Card>
-                        {/* </Layout> */}
                     </Col>
-                    <Col xs md lg='20' style={strMinHeight} >
-                        {/* <Graphics2d /> */}
-                        <Graphics2dtest />
-                        {/* {jsxGraph2d} */}
+                    <Col xs md lg='20' style={strMinHeight} key='graph2d_col' >
+                        <Graphics2dtest/>
                     </Col>
                 </Row>
              </Layout>
