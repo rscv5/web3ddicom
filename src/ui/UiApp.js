@@ -4,8 +4,8 @@ import { Layout, Row, Col } from 'antd';
 import "antd/dist/antd.css";
 import StoreActionType from '../store/ActionTypes';
 
-import UiMain from './UiMain'; // 
-import UiOpenSubMenuTest from './UiOpenSubMenutest';
+import UiMain from './UiMain'; 
+// import UiOpenSubMenuTest from './UiOpenSubMenutest';
 import UiOpenSubMenu from './UiOpenSubMenu';
 
 
@@ -37,9 +37,7 @@ class UiApp extends React.Component {
         this.m_store = store;
         const isLoaded = store.isLoaded;
         const fileName = store.fileName;
-        const volumeSlices = store.volumeSlices;
         const strMessageOnMenu = (isLoaded) ? 'File: ' + fileName : 'Press Computer DICOM button to load scene'
-        // console.log('>>>>>>>>>misload>>>>>>', isLoaded)
 
         const jsxReact =
             <Layout theme='light' style={{minHeight:'100vh'}}>
@@ -57,7 +55,6 @@ class UiApp extends React.Component {
                 <Content style={{ padding: '0 10px'}} >
                     {(isLoaded) ? <UiMain /> : 
                         <p>No Content</p>
-                        // console.log('>>>>hhh>>>', volumeSlices)
                         }
                 </Content>
             </Layout >

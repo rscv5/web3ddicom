@@ -39,6 +39,11 @@ export const initialState = {
     volumeSlices:[],
     // volumes number
     volumeNumber: 0,
+    // render2d
+    render2dxPos:0.0,
+    render2dyPos:0.0,
+    // tools2d
+    indexTools2d:0,
     
 };
 //
@@ -73,7 +78,13 @@ const rootReducer = (state = initialState, action) => {
             return Object.assign({}, state, { volumeSlices: action.volumeSlices});
         case StoreActionType.SET_VOLUME_NUMBER:
             return Object.assign({}, state, { volumeNumber: action.volumeNumber});
-        default:
+        case StoreActionType.SET_2D_X_POS:
+            return Object.assign({}, state, {render2dxPos: action.render2dxPos});
+        case StoreActionType.SET_2D_Y_POS:
+            return Object.assign({}, state, { render2dyPos: action.render2dyPos});
+        case StoreActionType.SET_2D_TOOLS_INDEX:
+            return Object.assign({}, state, { indexTools2d: action.indexTools2d });
+            default:
             return state;
     }
 }

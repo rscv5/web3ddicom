@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { connect } from 'react-redux';
-import { Card, Row, Col, Slider, Divider, InputNumber} from 'antd';
+import { Row, Col, Slider, Divider, InputNumber} from 'antd';
 
 import Modes2d from '../store/Modes2d';
 import StoreActionType from '../store/ActionTypes';

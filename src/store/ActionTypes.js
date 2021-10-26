@@ -18,6 +18,9 @@ const StoreActionType = {
     SET_GRAPHICS_2D: 13,
     SET_VOLUME_SLICES: 14,
     SET_VOLUME_NUMBER:15,
+    SET_2D_X_POS:16,
+    SET_2D_Y_POS:17,
+    SET_2D_TOOLS_INDEX: 18,
 };
 
 export default StoreActionType;

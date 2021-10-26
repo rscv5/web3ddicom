@@ -5,8 +5,11 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import Modes2d from '../store/Modes2d';
+
+import Tools2dType from '../tools2d/ToolTypes';
 import StoreActionType from '../store/ActionTypes';
+import ToolDistance from '../tools2d/ToolDistance';
+import ToolPick from '../tools2d/ToolPick';
 
 
 // ********************************************************
@@ -25,7 +28,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
 /**
  * Class Graphics2d some text later...
  */
- class Graphics2dTest extends React.Component{
+ class Graphics2d extends React.Component{
     /**
      * @param {object} props -props from up level object
      */
@@ -53,6 +56,18 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             windowMin: DEFAULT_WIN_MIN,
             windowMax: DEFAULT_WIN_MAX,
         };
+
+        this.onMouseDown = this.onMouseDown.bind(this);
+        this.onMouseUp = this.onMouseUp.bind(this);
+        this.onMouseMove = this.onMouseMove.bind(this);
+
+        // scale
+        this.m_xPos = 0;
+        this.m_yPos = 0;
+
+        // tools2d
+        this.m_toolDistance = new ToolDistance(this);
+        this.m_toolPick = new ToolPick(this);
 
         // store
         const store = props;
@@ -88,6 +103,60 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         }
     }
 
+
+    onMouseDown(evt){
+        const box = this.m_mount.getBoundingClientRect();
+        const xContainer = evt.clientX - box.left;
+        const yConatiner = evt.clientY - box.top;
+        const xScr = xContainer;
+        const yScr = yConatiner;
+
+        const store = this.props;
+        const indexTools2d = store.indexTools2d;
+        switch(indexTools2d){
+            case Tools2dType.INTENSITY:
+                this.m_toolPick.onMouseDown(xScr, yScr, store);
+                break;
+            case Tools2dType.DISTANCE:
+                this.m_toolDistance.onMouseDown(xScr, yScr, store);
+                break;
+            default:
+                // not defined
+        } // switch
+        // force update
+        this.forceUpdate();
+    }
+
+    onMouseMove(evt){
+        const store = this.props;
+        const indexTools2d = store.indexTools2d;
+        const box = this.m_mount.getBoundingClientRect();
+        const xContainer = evt.clientX - box.left;
+        const yConatiner = evt.clientY - box.top;
+        const xScr = xContainer;
+        const yScr = yConatiner;
+
+        if(indexTools2d === Tools2dType.DISTANCE){
+            this.m_toolDistance.onMouseMove(xScr, yScr, store);
+        }
+    }
+
+    onMouseUp(evt){
+        const store = this.props;
+        const indexTools2d = store.indexTools2d;
+        if(indexTools2d === Tools2dType.DISTANCE){
+            const store = this.props;
+            const box = this.m_mount.getBoundingClientRect();
+            const xScr = evt.clientX - box.left;
+            const yScr = evt.clientY - box.top;
+            this.m_toolDistance.onMouseUp(xScr, yScr, store);
+        }
+    }
+
+    // clear all tools
+    clear(){
+        this.m_toolDistance.clear();
+    }
 
 
     // update graph2dimg
@@ -149,9 +218,13 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             return;
         }
 
+        this.m_toolDistance.setScreenDim(w, h);
+        this.m_toolPick.setScreenDim(w, h);
+
         const store = this.props;
         ctx.fillStyle = 'rgb(64, 64, 64)';
         ctx.fillRect(0, 0, w, h);
+
 
         const volIndex = (volIndexArg !== undefined) ? volIndexArg : 0;
 
@@ -187,7 +260,8 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         if(series.length === 0){
             return;
         }
-        // console.log('>>>>>>>store.loaderDicom',loaderDicom)
+
+        // console.log('>>>>>>>store.loaderDicom',store)
         this.drawSlice(ctx, w, h, imgData, dataDst, series, loaderDicom, volIndex);
         this.renderReadyImage(volIndex);
     }
@@ -211,6 +285,12 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         let minVal = +LARGE_NUMBER;
         const xyDim = xDim * yDim;
         const zOff = 0;
+        
+        // setup pixel size for 2d tools
+        const xPixelSize = loaderDicom.m_boxSize.x / xDim;
+        const yPixelSize = loaderDicom.m_boxSize.y / yDim;
+        this.m_toolDistance.setPixelSize(xPixelSize, yPixelSize);
+
         let i;
         for(i = 0; i < xyDim; i++){
             let valSrc = sliceData16[i];
@@ -296,6 +376,10 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         // render text info
         this.renderTextInfo(ctx, info, volIndex);
 
+        // render all tools
+        this.m_toolPick.render(ctx);
+        this.m_toolDistance.render(ctx, store);
+
     }
 
     /**
@@ -314,6 +398,9 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         const jsxGrapSized = <canvas ref = { (mount) => {this.m_mount = mount}} 
                                 width = { this.state.wRender } 
                                 height = { this.state.hRender }
+                                onMouseDown={this.onMouseDown}
+                                onMouseUp={this.onMouseUp}
+                                onMouseMove={this.onMouseMove}
                                 // height="100%"
                                 // style={{height:'50%'}}
                             />
@@ -322,4 +409,4 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
     }
 }
 
-export default connect(store => store)(Graphics2dTest);
+export default connect(store => store)(Graphics2d);
