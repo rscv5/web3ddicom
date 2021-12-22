@@ -53,9 +53,12 @@ class UiMain2d extends React.Component {
         };
 
         const store = this.props;
-        const volSet = store.volumeSet;
-        const vols = volSet.m_volumes;
-        const numVols = vols.length;
+        const loaderDicom = store.loaderDicom;
+        const numVols = loaderDicom.m_numLoadedFiles;
+        // const volSet = store.volumeSet;
+        // const vols = volSet.m_volumes;
+        // const numVols = vols.length;
+        // console.log('>>>>>>numvols',store.loaderDicom)
         const jsxVolSel =  (numVols > 1)? <UiCtrl2d/> : <br/>;
 
 

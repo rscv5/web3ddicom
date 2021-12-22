@@ -19,7 +19,7 @@
     "react-redux": "^7.2.3",
     "react-scripts": "4.0.3",
     "redux": "^4.1.1",
-    "three": "^0.133.1"
+    "three": "0.101.1"
   },
   "scripts": {
     "start": "react-scripts start",

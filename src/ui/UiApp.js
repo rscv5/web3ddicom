@@ -5,9 +5,9 @@ import "antd/dist/antd.css";
 import StoreActionType from '../store/ActionTypes';
 
 import UiMain from './UiMain'; 
-// import UiOpenSubMenuTest from './UiOpenSubMenutest';
+import UiOpenSubMenuTest from './UiOpenSubMenuTest';
 import UiOpenSubMenu from './UiOpenSubMenu';
-
+import UiViewMode from './UiViewMode';
 
 const { Header, Content } = Layout;
 
@@ -47,15 +47,18 @@ class UiApp extends React.Component {
                             {strMessageOnMenu}
                         </Col>
                         <Col key='menu-col'>
-                            {/* <UiOpenSubMenuTest fileNameOnLoad={this.m_fileNameOnLoad} /> */}
-                            <UiOpenSubMenu fileNameOnLoad={this.m_fileNameOnLoad}/>
+                            {/* <UiOpenSubMenu fileNameOnLoad={this.m_fileNameOnLoad}/> */}
+                            <UiOpenSubMenuTest fileNameOnLoad = {this.m_fileNameOnLoad}/>
+                        </Col>
+                        <Col key='menu-23d'>
+                            {(isLoaded)? <UiViewMode/>: <p></p>}
                         </Col>
                     </Row>
                 </Header>
                 <Content style={{ padding: '0 10px'}} >
                     {(isLoaded) ? <UiMain /> : 
                         <p>No Content</p>
-                        }
+                    }
                 </Content>
             </Layout >
 

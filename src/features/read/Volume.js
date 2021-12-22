@@ -64,6 +64,26 @@ class Volume extends React.Component {
         }
     }
 
+    createDataBytesVolume(dicomslice, xDim, yDim, zDim){
+        this.m_xDim = xDim;
+        this.m_yDim = yDim;
+        this.m_zDim = zDim;
+        const xyzDim = xDim * yDim * zDim;
+        this.m_boxSize = {
+          x: xDim, y: yDim, z: zDim
+      };
+        this.m_dataArray = new Uint8Array(xyzDim);
+        for(let slicenumber in dicomslice){
+          const slice = dicomslice[slicenumber];
+          const data_8 = new Uint8Array(slice.m_image.buffer);
+          var start = 0;
+          for(let i = 0; i < data_8.length; i++){
+             this.m_dataArray[start+i] = data_8[i];
+          }
+          start = start+data_8.length;
+        }
+    }
+
     // Create icon for volume
     //   createIcon() {
     //     console.assert(this.m_xDim > 0);
@@ -186,7 +206,7 @@ class Volume extends React.Component {
     // do nothing. But we need to implement render() to run Volume tests
 
     render() {
-        return <p></p>;
+        return <p>></p>;
     }
 
 } // end class Volume

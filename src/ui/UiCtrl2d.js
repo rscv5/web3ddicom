@@ -86,8 +86,9 @@ class UiCtrl2d extends React.Component{
     render(){
         const store = this.props;
         const {inputValue} = this.state;
-        const volSet = store.volumeSet;
-        let slideRangeMax = volSet.getNumVolumes();
+        // const volSet = store.volumeSet;
+        const loaderDicom = store.loaderDicom;
+        let slideRangeMax = loaderDicom.m_numLoadedFiles;
         const jsxSlider = (slideRangeMax > 1) ?
           <Row key='select_dicom_row' style={{paddingLeft:"30px", width:'90%'}}>
           <Col span={20} >

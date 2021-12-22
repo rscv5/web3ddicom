@@ -10,6 +10,7 @@ import Tools2dType from '../tools2d/ToolTypes';
 import StoreActionType from '../store/ActionTypes';
 import ToolDistance from '../tools2d/ToolDistance';
 import ToolPick from '../tools2d/ToolPick';
+import ToolDelete from '../tools2d/ToolDelete';
 
 
 // ********************************************************
@@ -68,6 +69,8 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         // tools2d
         this.m_toolDistance = new ToolDistance(this);
         this.m_toolPick = new ToolPick(this);
+        this.m_toolDelete = new ToolDelete(this);
+
 
         // store
         const store = props;
@@ -120,6 +123,9 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             case Tools2dType.DISTANCE:
                 this.m_toolDistance.onMouseDown(xScr, yScr, store);
                 break;
+            case Tools2dType.DELETE:
+                this.m_toolDelete.onMouseDown(xScr, yScr, store);
+                break;
             default:
                 // not defined
         } // switch
@@ -151,11 +157,20 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
             const yScr = evt.clientY - box.top;
             this.m_toolDistance.onMouseUp(xScr, yScr, store);
         }
+
+        if(indexTools2d === Tools2dType.DELETE){
+            const store = this.props;
+            const box = this.m_mount.getBoundingClientRect();
+            const xScr = evt.clientX - box.left;
+            const yScr = evt.clientY - box.top;
+            this.m_toolDelete.onMouseUp(xScr, yScr, store);
+        }
     }
 
     // clear all tools
     clear(){
         this.m_toolDistance.clear();
+        this.m_toolDelete.clear();
     }
 
 
@@ -379,6 +394,7 @@ const DEFAULT_WIN_MAX = 650 + 2000 / 2;
         // render all tools
         this.m_toolPick.render(ctx);
         this.m_toolDistance.render(ctx, store);
+        this.m_toolDelete.render(ctx, store);
 
     }
 

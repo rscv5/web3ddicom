@@ -27,6 +27,7 @@ class UiTool2d extends React.Component {
                 { img: EditFilled, txt: 'intensity', ke: Tools2dType.INTENSITY, msgTp:'Get intensity'},
                 { img: MinusSquareFilled, txt: 'distance', ke:Tools2dType.DISTANCE, msgTp: 'Measure distance'},
                 { img: MinusSquareFilled, txt:'clear', ke:Tools2dType.CLEAR, msgTp:'Clear all tools'},
+                // { img: EditFilled, txt: 'delete', ke:Tools2dType.DELETE, msgTp: 'Delete certain tools'}
             ]
         }
     }

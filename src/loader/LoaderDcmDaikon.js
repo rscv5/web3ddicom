@@ -299,6 +299,15 @@ class LoaderDcmDaikon {
             this.m_sliceLocMax = (sliceLoc > this.m_sliceLocMax) ? sliceLoc : this.m_sliceLocMax;
         }
 
+        // slice number
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_NUM[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_NUM[1]);
+        const tagSlNum = image.tags[ind];
+        if (tagSlNum !== undefined) {
+        if (tagSlNum.value !== null) {
+            let sliceNumber = tagSlNum.value[0];
+            volSlice.m_sliceNumber = sliceNumber;
+            }
+        }
 
         // samples per pixel
         ind = daikon.Utils.dec2hex(daikon.Tag.TAG_SAMPLES_PER_PIXEL[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_SAMPLES_PER_PIXEL[1]);
@@ -333,14 +342,28 @@ class LoaderDcmDaikon {
         this.m_loaderDicom.m_windowWidth = tagWinWid.value[0];
         }
 
-        // slice number
-        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_NUM[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_NUM[1]);
-        const tagSlNum = image.tags[ind];
-        if (tagSlNum !== undefined) {
-            if (tagSlNum.value !== null) {
-                let sliceNumber = tagSlNum.value[0];
-                volSlice.m_sliceNumber = sliceNumber;
-            }
+        // read rescale intercept
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_DATA_SCALE_INTERCEPT[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_DATA_SCALE_INTERCEPT[1]);
+        const tagResInt = image.tags[ind];
+        if (tagResInt !== undefined) {
+        this.m_loaderDicom.m_rescaleIntercept = tagResInt.value[0];
+        }
+
+        // read rescale slope
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_DATA_SCALE_SLOPE[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_DATA_SCALE_SLOPE[1]);
+        const tagResSlo = image.tags[ind];
+        if (tagResSlo !== undefined) {
+        this.m_loaderDicom.m_rescaleSlope = tagResSlo.value[0];
+        }
+
+        // read rescale type
+        const TAG_RESCALE_TYPE = [0x0028, 0x1054];
+        ind = daikon.Utils.dec2hex(TAG_RESCALE_TYPE[0]) + daikon.Utils.dec2hex(TAG_RESCALE_TYPE[1]);
+        const tagResTyp = image.tags[ind];
+        if (tagResTyp !== undefined) {
+        if ((tagResTyp.value !== null) && (tagResTyp.value[0] === 'HU')) {
+            this.m_loaderDicom.m_rescaleHounsfield = true;
+        }
         }
 
         // read pixel representation
@@ -352,8 +375,28 @@ class LoaderDcmDaikon {
             }
         }
 
-        // add volume slice to slices volume (and manage series)
-        // this.m_loaderDicom.m_slicesVolume.addSlice(volSlice);
+        // read pixel spacing on xy (physical dimensions)
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[1]);
+        const tagPS = image.tags[ind];
+        if (tagPS !== undefined) {
+            let arrSpa = tagPS.value;
+            const VAL_2 = 2;
+            if (arrSpa.length === VAL_2) {
+                this.m_loaderDicom.m_pixelSpacing.x = parseFloat(arrSpa[0]);
+                this.m_loaderDicom.m_pixelSpacing.y = parseFloat(arrSpa[1]);
+            }
+        }
+        // read pixel spacing on z (physical dimensions)
+        ind = daikon.Utils.dec2hex(daikon.Tag.TAG_SLICE_THICKNESS[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_SLICE_THICKNESS[1]);
+        const tagSLT = image.tags[ind];
+        if (tagSLT !== undefined) {
+            let arrThick = tagSLT.value;
+            if (arrThick.length === 1) {
+                this.m_loaderDicom.m_pixelSpacing.z = parseFloat(arrThick[0]);
+            }
+        // console.log('val pad = ' + valPad);
+        }
+
 
         // get image position (x,y,z), help to detect volume physical size
         ind = daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_POSITION[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_IMAGE_POSITION[1]);
@@ -391,6 +434,7 @@ class LoaderDcmDaikon {
         // console.log('val pad = ' + valPad);
         }
 
+        
         // get important tag: pixel spacing in 2d (xy)
         ind = daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[0]) + daikon.Utils.dec2hex(daikon.Tag.TAG_PIXEL_SPACING[1]);
         // if ((tag.m_group === TAG_PIXEL_SPACING[0]) && (tag.m_element === TAG_PIXEL_SPACING[1])) {

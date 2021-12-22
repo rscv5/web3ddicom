@@ -10,7 +10,7 @@
 import React from 'react';
 
 import Volume from './Volume';
-import LoaderDicom from '../../loader/LoaderDicom';
+// import LoaderDicom from '../../loader/LoaderDicom';
 
 
 
@@ -63,6 +63,7 @@ class VolumeSet extends React.Component {
      * @param {Volume} vols -added volume
      */
     addVolume(vol) {
+        console.assert(vol instanceof Volume, "VolumeSet.addVolume: arg must be Volume");
         this.m_volumes.push(vol);
         this.m_numVolumes++;
         
@@ -105,7 +106,7 @@ class VolumeSet extends React.Component {
 
     //do nothing.but we need to implement render() to run Volume tests
     render() {
-        return <p></p>;
+        return <p>></p>;
     }
 
 
@@ -117,21 +118,22 @@ class VolumeSet extends React.Component {
     * Read KTX from local file buffer
      * 
     * @param {char array} arrBuf 
-    * @param {func} callbackProgress 
     * @param {func} callbackComplete 
     */
 
-    readFromDicom(loader, arrBuf, callbackProgress, callbackComplete) {
+    readFromDicom(loader, arrBuf, callbackComplete) {
         const indexFile = 0;
         const fileName = 'file???';
         // const ratio = 0.0;
         // LoaderDicom func
-        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackProgress, callbackComplete);
+        // console.log('>>>>>>>>>>>>VOLUMESET')
+        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackComplete);
+        // console.log('ret>>>>>>>>>',ret);
         return ret;
     }
 
-    readSingleSliceFromDicom(loader, indexFile, fileName, arrBuf, callbackProgress, callbackComplete) {
-        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackProgress, callbackComplete);
+    readSingleSliceFromDicom(loader, indexFile, fileName, arrBuf, callbackComplete) {
+        const ret = loader.readFromBuffer(indexFile, fileName, arrBuf, callbackComplete);
         return ret;
     }
 
