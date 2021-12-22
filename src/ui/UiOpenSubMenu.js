@@ -11,9 +11,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import { Row, Col, Button, Menu } from 'antd';
 import "antd/dist/antd.css";
-import { ContainerOutlined, FileImageOutlined, ProjectOutlined, ReadFilled } from '@ant-design/icons';
-import createReadStream from 'filereader-stream';
-import daikon from 'daikon';
+import { ContainerOutlined } from '@ant-design/icons';
+// import createReadStream from 'filereader-stream';
+// import daikon from 'daikon';
 
 import LoaderDcmDaikon from '../loader/LoaderDcmDaikon';
 import VolumeSet from '../features/read/VolumeSet';
@@ -29,7 +29,8 @@ import LoadResult from '../loader/LoadResult';
 // Const
 //*************************************************
 
-
+// deep artificially fix volume texture size to 4 * N
+const NEED_TEXTURE_SIZE_4X = true;
 
 // use daikon parser for Dicom (*dcm) file loading
 const READ_DICOM_VIA_DAIKON = true;
@@ -54,7 +55,7 @@ class UiOpenSubMenu extends React.Component {
         this.onFileContentReadSingleSliceFile = this.onFileContentReadSingleSliceFile.bind(this);
 
         this.onFileContentReadMultipleDicom = this.onFileContentReadMultipleDicom.bind(this);
-        // this.onDicomSerieSelected = this.onDicomSerieSelected.bind(this);
+        this.onDicomSerieSelected = this.onDicomSerieSelected.bind(this);
 
         this.setErrorString = this.setErrorString.bind(this);
 
@@ -65,7 +66,7 @@ class UiOpenSubMenu extends React.Component {
         this.callbackReadProgress = this.callbackReadProgress.bind(this);
 
 
-        // this.callbackReadMultipleComplete = this.callbackReadMultipleComplete.bind(this);
+        this.callbackReadMultipleComplete = this.callbackReadMultipleComplete.bind(this);
         this.callbackCompleteMultipleDicom = this.callbackCompleteMultipleDicom.bind(this);
 
         this.m_fileNameOnLoad = '';
@@ -85,6 +86,12 @@ class UiOpenSubMenu extends React.Component {
     }
 
 
+    callbackReadMultipleComplete(errCode){
+        if(errCode !== LoadResult.SUCCESS){
+            const strErr = LoadResult.getResultString(errCode);
+            this.setErrorString(strErr);
+        }
+    }
     callbackReadSingleDicomComplete(errCode) {
         if (errCode === LoadResult.SUCCESS) {
 
@@ -120,21 +127,17 @@ class UiOpenSubMenu extends React.Component {
 
 
     finalizeSuccessLoadedVolume(volSet, fileNameIn) {
-
-
         const store = this.props;
-
         console.assert(volSet instanceof VolumeSet, "finalizeSuccessLoadedVolume: should be VolumeSet");
-
         console.assert(volSet.getNumVolumes() >= 1, "finalizeSuccessLoadedVolume: should be more or 1 volume");
         const indexVol = 0;
-
+        const dicom = store.loaderDicom;
         const vol = volSet.getVolume(indexVol);
         console.assert(vol !== null, "finalizeSuccessLoadedVolume: should be non zero volume");
-
+        console.log('>>>>>>>>>vol',vol);
+        console.log('>?>>>>>>>>dicom', dicom);
         if (vol.m_dataArray !== null) {
             console.log(`success loaded volume from ${fileNameIn}`);
-
             // send update (repaint) if was loaded prev model
             if (store.isLoaded) {
                 store.dispatch({ type: StoreActionType.SET_IS_LOADED, isLoaded: false });
@@ -153,7 +156,9 @@ class UiOpenSubMenu extends React.Component {
             // store.dispatch({ type: StoreActionType.SET_MODE_3D, mode3d: Modes3d.RAYCAST });
         }
     }
+
     callbackReadComplete(errCode) {
+        // console.log('>>>>>>>>>>>read complete',errCode, LoadResult.SUCCESS)
         if (errCode === undefined) {
             console.log('callbackReadComplete. should be errCode');
         } else {
@@ -162,10 +167,6 @@ class UiOpenSubMenu extends React.Component {
                 this.setErrorString(strErr);
             }
         }
-        // const store = this.props;
-        // const uiapp = store.uiApp;
-        // console.log(`callbackReadComplete wiyth err = ${loadErrorCode}`);
-        // uiapp.doHideProgressBar();
 
         if (errCode === LoadResult.SUCCESS) {
             // console.log('callbackReadComplete finished OK');
@@ -217,24 +218,45 @@ class UiOpenSubMenu extends React.Component {
     onFileReadSingleBuffer(strContent) {
         //daikon read
         //strContent is ArrayBuffer
-        this.m_volumeSet = new VolumeSet();
-        this.m_volumeSet.addVolume(new Volume());
+        // this.m_volumeSet = new VolumeSet();
+        // this.m_volumeSet.addVolume(new Volume());
+        // const callbackCompleteSingleDicom = this.callbackReadSingleDicomComplete;
         if ((this.m_fileName.endsWith('.dcm') || this.m_fileName.endsWith('.DCM')) && READ_DICOM_VIA_DAIKON) {
             const loaderDcm = new LoaderDcmDaikon();
             const store = this.props;
             const fileName = this.m_fileName;
             const fileIndex = this.m_fileIndex;
             this.m_loader = new LoaderDicom(1);
-            console.log('>>>>>>>>m_loader>>>>',this.m_loader)
+            // console.log('>>>>>>>>m_loader>>>>',this.m_loader)
             // console.log('>>>>>>>m_volumeSet>>', this.m_volumeSet)
             const ret = loaderDcm.readSingleSlice(store, this.m_loader, fileIndex, fileName, strContent);
             this.callbackReadSingleDicomComplete(ret);
-            
+            // this.m_volumeSet.readFromDicom(this.m_loader, strContent, callbackCompleteSingleDicom);
             return ret;
+        }
+        console.log('UiOpenMenu. onFileReadSingleBuffer....');
+
+        this.m_volumeSet = new VolumeSet();
+        this.m_volumeSet.addVolume(new Volume());
+        // const callbackComplete = this.callbackReadComplete;
+        const callbackCompleteSingleDicom = this.callbackReadSingleDicomComplete;
+        if (this.m_fileName.endsWith('.dcm') || this.m_fileName.endsWith('.DCM')) {
+            this.m_loader = new LoaderDicom();
+            this.m_loader.m_zDim = 1;
+            this.m_loader.m_numFiles = 1;
+            this.m_volumeSet.readFromDicom(this.m_loader, strContent, callbackCompleteSingleDicom);
+            // save dicomInfo to store
+            const dicomInfo = this.m_loader.m_dicomInfo;
+            const sliceInfo = dicomInfo.m_sliceInfo[0];
+            sliceInfo.m_fileName = this.m_fileName;
+            sliceInfo.m_sliceName = 'Slice 0';
+            const store = this.props;
+            store.dispatch({ type: StoreActionType.SET_DICOM_INFO, dicomInfo: dicomInfo });
         }
         else {
             console.log(`onFileContentReadSingleFile: unknown file type: ${this.m_fileName}`);
         }
+        
     }
 
     onButtonLocalFile (evt){
@@ -242,8 +264,19 @@ class UiOpenSubMenu extends React.Component {
         this.m_fileSelector.click();
 
     }
-    test = () => {
-        console.log('>>>>>>>fake func<<<<<')
+
+    onDicomSerieSelected(indexSelected){
+        const store = this.props;
+        const series = store.dicomSeries;
+        const serieSelected = series[indexSelected];
+        const hash = serieSelected.m_hash;
+        // console.log('>>>>>>>>hash',hash)
+        this.m_loader.createVolumeFromSlices(this.m_volumeSet, indexSelected, hash);
+        this.finalizeSuccessLoadedVolume(this.m_volumeSet, this.m_fileName);
+        console.log(`onFileContentReadMultipleDicom read all ${this.m_numFiles} files`);
+        
+        // clear modal
+        store.dispatch({type: StoreActionType.SET_DICOM_SERIES, dicomSeries:[] });
     }
 
     //
@@ -259,31 +292,47 @@ class UiOpenSubMenu extends React.Component {
         var volumeSet = this.m_volumeSet;
         var m_fileIndex = this.m_fileIndex;
         const store = this.props;
-
+        if(this.m_fileIndex <=1){
+            // add new volume to volume set on the first slice
+            const vol = new Volume();
+            volumeSet.addVolume(vol);
+        }
+        // can be invoked with error code
+        const callbackCompleteVoid = this.callbackCompleteMultipleDicom;
+        // const callbackComplete = this.callbackReadComplete;
         let readStatus;
+
         fileReader.onloadend = function(e){
             var rawlog = fileReader.result;
             const loaderDcm = new LoaderDcmDaikon();
             var index = m_fileIndex - 1; 
-            // console.log(">>>>>index", index)
-            readStatus = loaderDcm.readSlice(m_loader, index, file.name, rawlog);
-            // store.dispatch({ type: StoreActionType.SET_VOLUME_INDEX, volumeIndex: this.m_fileIndex - 1 });
-            volumeSet.addVolume(new Volume());
+            if(READ_DICOM_VIA_DAIKON){
+                // const readstatus = volumeSet.readSingleSliceFromDicom(m_loader, index, file.name,
+                //     rawlog, callbackComplete);
+                readStatus = loaderDcm.readSlice(m_loader, index, file.name, rawlog);
+
+            }else{
+                // volumeSet.addVolume(new Volume());
+                // m_loader.readFromBuffer(index, file.name, rawlog);
+                readStatus = volumeSet.readSingleSliceFromDicom(m_loader, index, file.name,
+                     rawlog, callbackCompleteVoid);
+            }
             store.dispatch({ type: StoreActionType.SET_VOLUME_INDEX, volumeIndex: index });
             if (readStatus !== LoadResult.SUCCESS) {
                 console.log('onFileContentReadMultipleDicom. Error read individual file');                
             }
         }
         if ((this.m_fileIndex === this.m_numFiles) && (this.m_fileIndex !== 1)) {
-
+            // load successfully
             store.dispatch({ type: StoreActionType.SET_LOADER_DICOM, loaderDicom: this.m_loader });
             store.dispatch({ type: StoreActionType.SET_FILENAME, fileName: 'Multiple DICOM Files'})
             store.dispatch({ type: StoreActionType.SET_VOLUME_SET, volumeSet: volumeSet });
             store.dispatch({ type: StoreActionType.SET_IS_LOADED, isLoaded: true });
-            
-
+            //             
+            this.callbackReadComplete(LoadResult.SUCCESS);
             return; // do nothing immediately after: wait for dialog
           } // end if successfully read all files (multiple dicom read)
+        // else if()
     }
 
     //
@@ -304,7 +353,8 @@ class UiOpenSubMenu extends React.Component {
                 this.m_fileReader = new FileReader();
                 this.m_fileReader.onloadend = this.onFileContentReadSingleFile;
                 this.m_fileReader.readAsArrayBuffer(file);
-            } else {
+            } 
+            else {
                 // not single file was open
                 this.m_files = Array.from(evt.target.files); // filelist -> array
                 this.m_fileIndex = 0;
@@ -330,7 +380,7 @@ class UiOpenSubMenu extends React.Component {
 
                 //save dicomInfo to store
                 store.dispatch({ type: StoreActionType.SET_DICOM_INFO, dicomInfo: dicomInfo })
-
+                // console.log('>>>>>>>>>>>>volumeNumber', this.m_numFiles);
                 store.dispatch({ type: StoreActionType.SET_VOLUME_NUMBER, volumeNumber:this.m_numFiles});
 
                 // save dicom loader to store
@@ -362,6 +412,7 @@ class UiOpenSubMenu extends React.Component {
     }
     componentDidMount() {
         this.m_fileSelector = this.buildFileSelector();
+        // this.onDicomSerieSelected(0);
 
     }
     //render
@@ -375,17 +426,11 @@ class UiOpenSubMenu extends React.Component {
         }
 
         const jsxOpenMenu =
-
-            <Menu theme='light' key='submenu' mode='horizontal' style={{ border: '0px' }}>
-                <Menu.Item key='OpenDicom' icon={<ContainerOutlined />}
-                    onClick={evt => this.onButtonLocalFile(evt)} >Computer DICOM </Menu.Item>
-                <Menu.Item key='2dDicomMenu' icon={<FileImageOutlined />}
-                    onClick={this.test} >2D Mode View</Menu.Item>
-                <Menu.Item key='3dDicomMenu' icon={<ProjectOutlined />}
-                    onClick={this.test} >3D Mode View</Menu.Item>
-            </Menu>
-
-
+                <Button key='OpenDicom' onClick={evt => this.onButtonLocalFile(evt)} 
+                        icon={<ContainerOutlined/>} size='large' shape='round'
+                        style={{marginLeft:'10px'}} type='primary'>
+                        Computer DICOM 
+                </Button>
         return jsxOpenMenu;
     }
 }

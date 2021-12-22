@@ -8,13 +8,14 @@
 // Imports
 // **************************************************
 
-import { Card } from "antd";
-import {ListGroup, ListGroupItem} from 'react-bootstrap';
+// import { Card } from "antd";
+import {Card, ListGroup, ListGroupItem} from 'react-bootstrap';
 
 import React from "react";
 import { connect } from 'react-redux';
 
 import StoreActionType from "../store/ActionTypes";
+import UiVolIcon from './UiVolIcon';
 
 // import Texture3D from '../dicomvol/Texture3D'
 
@@ -91,8 +92,11 @@ class UiVolumeSel extends React.Component{
         const strTitle = `Volume select. [${strPatName}:${strStudyDescr}]`;
 
         const jsx =
-        <Card title={strTitle} >
-            TEST
+        <Card>
+            <Card.Header>
+                 {strTitle}
+            </Card.Header>
+            <Card.Body>
             <ListGroup>
             {vols.map( (vol, i) => {
                 const numSlices = vol.m_zDim;
@@ -100,13 +104,14 @@ class UiVolumeSel extends React.Component{
                 const strVo = `vol ${strSer} [${numSlices}] slices`;
                 let jsxListItem;
                 if (i === volumeIndex) {
-                jsxListItem = <ListGroupItem key={i} onClick={() => {this.onClickRow(i)} } active>{strVo}  </ListGroupItem>;
+                jsxListItem = <ListGroupItem key={i} onClick={() => {this.onClickChoice(i)} } active>{strVo}<UiVolIcon index={i} />  </ListGroupItem>;
                 } else {
-                jsxListItem = <ListGroupItem key={i} onClick={() => {this.onClickRow(i)} }>{strVo} </ListGroupItem>;
+                jsxListItem = <ListGroupItem key={i} onClick={() => {this.onClickChoice(i)} }>{strVo}<UiVolIcon index={i} /> </ListGroupItem>;
                 }
                 return jsxListItem;
             })}
             </ListGroup>
+        </Card.Body>
         </Card>
         return jsx;
     }

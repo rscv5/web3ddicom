@@ -1,0 +1,8 @@
+.ui-ctrl2d-row {
+  height: 300px;
+}
+
+.ui-main2d-info {
+  height: calc(100% - 32px);
+  /* height: 700px; */
+}

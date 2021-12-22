@@ -3,21 +3,23 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@ant-design/icons": "^4.6.4",
+    "@ant-design/icons": "^4.7.0",
     "@reduxjs/toolkit": "^1.5.1",
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "antd": "^4.16.13",
-    "bootstrap": "^5.1.1",
     "daikon": "^1.2.42",
     "filereader-stream": "^2.0.0",
+    "jquery": "^3.6.0",
     "react": "^17.0.2",
     "react-bootstrap": "^2.0.0-rc.0",
     "react-dom": "^17.0.2",
     "react-nouislider": "^2.0.1",
     "react-redux": "^7.2.3",
-    "react-scripts": "4.0.3"
+    "react-scripts": "4.0.3",
+    "redux": "^4.1.1",
+    "three": "0.101.1"
   },
   "scripts": {
     "start": "react-scripts start",

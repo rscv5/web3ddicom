@@ -8,14 +8,14 @@
 
 import DicomDictionary from '../dicomvol/dicomdict';
 import DicomInfo from '../dicomvol/dicominfo';
-// import DicomTag from './dicomtag';
+import DicomTag from '../dicomvol/dicomtag';
 import DicomSlice from '../dicomvol/dicomslice';
 import DicomSlicesVolume from '../dicomvol/dicomslicesvolume';
 import Volume from '../features/read/Volume';
 import VolumeSet from '../features/read/VolumeSet';
 import LoadResult from './LoadResult';
 import DicomSliceInfo from '../dicomvol/dicomsliceinfo';
-// import DicomTagInfo from '../dicomvol/dicomtaginfo';
+import DicomTagInfo from '../dicomvol/dicomtaginfo';
 // import FileTools from './FileTools';
 // import FileLoader from './FileLoader';
 
@@ -253,7 +253,7 @@ class LoaderDicom {
         volDst = new Volume();
         volSet.addVolume(volDst);
         volDst = volSet.getVolume(indexSelected);
-        console.log('>>>>>>>>>>>>', volDst)
+        // console.log('>>>>>>>>>>>>', volDst)
       }
       const numSeries = this.m_slicesVolume.m_series.length;
       // get serie with given hash
@@ -1268,7 +1268,10 @@ class LoaderDicom {
      * @param {object} arrBuf - source byte buffer, ArrayBuffer type
      * @return LoadResult.XXX
      */
-    readFromBuffer(indexFile, fileName, ratioLoaded, arrBuf, callbackProgress, callbackComplete) {
+    readFromBuffer(indexFile, fileName, arrBuf, callbackComplete) {
+
+        // console.log('>>>>>>>>>>>')
+
         if (typeof indexFile !== 'number') {
         console.log('LoaderDicom.readFromBuffer: bad indexFile argument');
         }
@@ -1855,19 +1858,12 @@ class LoaderDicom {
 
         volSlice.m_xDim = this.m_xDim;
         volSlice.m_yDim = this.m_yDim;
-
-        // console.log(`patName = ${volSlice.m_patientName}`);
-        // console.log(`studyDescr = ${volSlice.m_studyDescr}`);
-        // console.log(`studyDate = ${volSlice.m_studyDate}`);
-        // console.log(`seriesTime = ${volSlice.m_seriesTime}`);
-        // console.log(`seriesDescr = ${volSlice.m_seriesDescr}`);
-        // console.log(`bodyPartExamined = ${volSlice.m_bodyPartExamined}`);
-
         
 
         // Fill slice image
         // const imageDst = this.m_slices[this.m_imageNumber];
         const imageDst = volSlice.m_image;
+        // console.log('>>>>>>>>>>>>volSiceimgae',imageDst);
         const imageSrc = new DataView(tag.m_value);
         if (imageSrc === null) {
         console.log('No memory');
@@ -1953,6 +1949,7 @@ class LoaderDicom {
         // if (this.m_fromGoogle) {
         //     status = this.readFromGoogleBuffer(i, fileName, ratioLoaded, fileArrBu, callbackProgress, callbackComplete);
         // } else {
+        // console.log('??????????????????????????????');
         status = this.readFromBuffer(i, fileName, ratioLoaded, fileArrBu, callbackProgress, callbackComplete);
         // }
 

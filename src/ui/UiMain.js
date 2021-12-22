@@ -16,7 +16,7 @@ class UiMain extends React.Component {
 
         const jsArray = new Array(ModeView.VIEW_COUNT);
         jsArray[ModeView.VIEW_2D] = jsMain2d;
-        jsArray[ModeView.VIEW_3D] = jsMain3d;
+        jsArray[ModeView.VIEW_3D_LIGHT] = jsMain3d;
 
         const jsxRet = jsArray[modeViewIndex];
         return jsxRet;

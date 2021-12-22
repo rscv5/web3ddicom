@@ -64,6 +64,26 @@ class Volume extends React.Component {
         }
     }
 
+    createDataBytesVolume(dicomslice, xDim, yDim, zDim){
+        this.m_xDim = xDim;
+        this.m_yDim = yDim;
+        this.m_zDim = zDim;
+        const xyzDim = xDim * yDim * zDim;
+        this.m_boxSize = {
+          x: xDim, y: yDim, z: zDim
+      };
+        this.m_dataArray = new Uint8Array(xyzDim);
+        for(let slicenumber in dicomslice){
+          const slice = dicomslice[slicenumber];
+          const data_8 = new Uint8Array(slice.m_image.buffer);
+          var start = 0;
+          for(let i = 0; i < data_8.length; i++){
+             this.m_dataArray[start+i] = data_8[i];
+          }
+          start = start+data_8.length;
+        }
+    }
+
     // Create icon for volume
     //   createIcon() {
     //     console.assert(this.m_xDim > 0);
@@ -106,87 +126,87 @@ class Volume extends React.Component {
     
     //Make each volume texture size equal to 4 * N
     
-      // makeDimensions4x() {
-      //   // do nothing if z slices less then 4 (was less 1)
-      //   if (this.m_zDim < 4) {
-      //     return;
-      //   }
-      //   const xDimNew = (this.m_xDim + 3) & (~3);
-      //   const yDimNew = (this.m_yDim + 3) & (~3);
-      //   const zDimNew = (this.m_zDim + 3) & (~3);
-      //   if ((this.m_xDim === xDimNew) && (this.m_yDim === yDimNew) && (this.m_zDim === zDimNew)) {
-      //     return; // do nothing
-      //   } // if new size the same as current
-      //   // perfom convert adding black pixels
-      //   console.log(`Volume. makeDimensions4x. Convert into ${xDimNew}*${yDimNew}*${zDimNew}`);
-      //   const xyzDimNew  = xDimNew * yDimNew * zDimNew;
-      //   const bytesPerVoxel = this.m_bytesPerVoxel;
-      //   const bufSizeBytes = xyzDimNew * bytesPerVoxel;
-      //   const datArrayNew = new Uint8Array(xyzDimNew * bytesPerVoxel);
-      //   let i;
-      //   for (i = 0; i < bufSizeBytes; i++) {
-      //     datArrayNew[i] = 0;
-      //   }
+      makeDimensions4x() {
+        // do nothing if z slices less then 4 (was less 1)
+        if (this.m_zDim < 4) {
+          return;
+        }
+        const xDimNew = (this.m_xDim + 3) & (~3);
+        const yDimNew = (this.m_yDim + 3) & (~3);
+        const zDimNew = (this.m_zDim + 3) & (~3);
+        if ((this.m_xDim === xDimNew) && (this.m_yDim === yDimNew) && (this.m_zDim === zDimNew)) {
+          return; // do nothing
+        } // if new size the same as current
+        // perfom convert adding black pixels
+        console.log(`Volume. makeDimensions4x. Convert into ${xDimNew}*${yDimNew}*${zDimNew}`);
+        const xyzDimNew  = xDimNew * yDimNew * zDimNew;
+        const bytesPerVoxel = this.m_bytesPerVoxel;
+        const bufSizeBytes = xyzDimNew * bytesPerVoxel;
+        const datArrayNew = new Uint8Array(xyzDimNew * bytesPerVoxel);
+        let i;
+        for (i = 0; i < bufSizeBytes; i++) {
+          datArrayNew[i] = 0;
+        }
 
-      //   const ONE = 1;
-      //   const FOUR = 4;
-      //   const OFF_0 = 0; const OFF_1 = 1;
-      //   const OFF_2 = 2; const OFF_3 = 3;
+        const ONE = 1;
+        const FOUR = 4;
+        const OFF_0 = 0; const OFF_1 = 1;
+        const OFF_2 = 2; const OFF_3 = 3;
 
-      //   console.log(`Volume info: xyzDim = ${this.m_xDim}*${this.m_yDim}*${this.m_zDim}`);
-      //   console.log(`Volume info: bpp = ${this.m_bytesPerVoxel}`);
-      //   console.log(`Volume info: dataSize = ${this.m_dataSize}`);
+        console.log(`Volume info: xyzDim = ${this.m_xDim}*${this.m_yDim}*${this.m_zDim}`);
+        console.log(`Volume info: bpp = ${this.m_bytesPerVoxel}`);
+        console.log(`Volume info: dataSize = ${this.m_dataSize}`);
 
-      //   const xyDim = this.m_xDim * this.m_yDim;
-      //   if (this.m_bytesPerVoxel === ONE) {
-      //     for (let z = 0; z < this.m_zDim; z++) {
-      //       const zOff = z * xyDim;
-      //       const zOffDst = z * xDimNew * yDimNew;
-      //       for (let y = 0; y < this.m_yDim; y++) {
-      //         const yOff = y * this.m_xDim;
-      //         const yOffDst = y * xDimNew;
-      //         for (let x = 0; x < this.m_xDim; x++) {
-      //           const off = x + yOff + zOff;
-      //           const val = this.m_dataArray[off];
-      //           const offDst = x + yOffDst + zOffDst;
-      //           datArrayNew[offDst] = val;
-      //         } // for (x)
-      //       } // for (y)
-      //     } // for (z)
-      //   } else if (this.m_bytesPerVoxel === FOUR) {
-      //     for (let z = 0; z < this.m_zDim; z++) {
-      //       const zOff = z * xyDim;
-      //       const zOffDst = z * xDimNew * yDimNew;
-      //       for (let y = 0; y < this.m_yDim; y++) {
-      //         const yOff = y * this.m_xDim;
-      //         const yOffDst = y * xDimNew;
-      //         for (let x = 0; x < this.m_xDim; x++) {
-      //           const off = (x + yOff + zOff) * FOUR;
-      //           const val0 = this.m_dataArray[off + OFF_0];
-      //           const val1 = this.m_dataArray[off + OFF_1];
-      //           const val2 = this.m_dataArray[off + OFF_2];
-      //           const val3 = this.m_dataArray[off + OFF_3];
-      //           const offDst = (x + yOffDst + zOffDst) * FOUR;
-      //           datArrayNew[offDst + OFF_0] = val0;
-      //           datArrayNew[offDst + OFF_1] = val1;
-      //           datArrayNew[offDst + OFF_2] = val2;
-      //           datArrayNew[offDst + OFF_3] = val3;
-      //         } // for (x)
-      //       } // for (y)
-      //     } // for (z)
-      //   }
+        const xyDim = this.m_xDim * this.m_yDim;
+        if (this.m_bytesPerVoxel === ONE) {
+          for (let z = 0; z < this.m_zDim; z++) {
+            const zOff = z * xyDim;
+            const zOffDst = z * xDimNew * yDimNew;
+            for (let y = 0; y < this.m_yDim; y++) {
+              const yOff = y * this.m_xDim;
+              const yOffDst = y * xDimNew;
+              for (let x = 0; x < this.m_xDim; x++) {
+                const off = x + yOff + zOff;
+                const val = this.m_dataArray[off];
+                const offDst = x + yOffDst + zOffDst;
+                datArrayNew[offDst] = val;
+              } // for (x)
+            } // for (y)
+          } // for (z)
+        } else if (this.m_bytesPerVoxel === FOUR) {
+          for (let z = 0; z < this.m_zDim; z++) {
+            const zOff = z * xyDim;
+            const zOffDst = z * xDimNew * yDimNew;
+            for (let y = 0; y < this.m_yDim; y++) {
+              const yOff = y * this.m_xDim;
+              const yOffDst = y * xDimNew;
+              for (let x = 0; x < this.m_xDim; x++) {
+                const off = (x + yOff + zOff) * FOUR;
+                const val0 = this.m_dataArray[off + OFF_0];
+                const val1 = this.m_dataArray[off + OFF_1];
+                const val2 = this.m_dataArray[off + OFF_2];
+                const val3 = this.m_dataArray[off + OFF_3];
+                const offDst = (x + yOffDst + zOffDst) * FOUR;
+                datArrayNew[offDst + OFF_0] = val0;
+                datArrayNew[offDst + OFF_1] = val1;
+                datArrayNew[offDst + OFF_2] = val2;
+                datArrayNew[offDst + OFF_3] = val3;
+              } // for (x)
+            } // for (y)
+          } // for (z)
+        }
 
-      //   this.m_xDim = xDimNew;
-      //   this.m_yDim = yDimNew;
-      //   this.m_zDim = zDimNew;
-      //   this.m_dataArray = datArrayNew;
-      //   this.m_dataSize = xyzDimNew;
-      // } // end
+        this.m_xDim = xDimNew;
+        this.m_yDim = yDimNew;
+        this.m_zDim = zDimNew;
+        this.m_dataArray = datArrayNew;
+        this.m_dataSize = xyzDimNew;
+      } // end
 
     // do nothing. But we need to implement render() to run Volume tests
 
     render() {
-        return <p></p>;
+        return <p>></p>;
     }
 
 } // end class Volume
